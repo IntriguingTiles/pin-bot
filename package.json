@@ -1,0 +1,28 @@
+{
+  "name": "pin-bot",
+  "version": "1.0.0",
+  "description": "a bot that overcomes the pin limit",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IntriguingTiles/pin-bot.git"
+  },
+  "author": "IntriguingTiles",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/IntriguingTiles/pin-bot/issues"
+  },
+  "homepage": "https://github.com/IntriguingTiles/pin-bot#readme",
+  "dependencies": {
+    "better-sqlite-pool": "^0.1.2",
+    "bufferutil": "^4.0.0",
+    "discord.js": "^11.4.2",
+    "dotenv": "^6.1.0",
+    "enmap": "^4.3.2",
+    "erlpack": "github:discordapp/erlpack",
+    "uws": "^99.0.0"
+  }
+}
