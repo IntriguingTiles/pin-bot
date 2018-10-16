@@ -263,6 +263,12 @@ ${prefix}help\`\`\``);
     }
 });
 
+process.on("SIGINT", async () => {
+    guildSettings.close();
+    await client.destroy();
+    process.exit(0);
+});
+
 function clean(text) {
     if (typeof (text) === "string")
         return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203));
