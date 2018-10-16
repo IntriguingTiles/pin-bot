@@ -105,7 +105,7 @@ client.on("channelPinsUpdate", async ch => {
             embed.setColor(0x23D160);
             if (msg.attachments.size !== 0) embed.setImage(msg.attachments.first().url);
 
-            client.channels.get(settings.logChannel).send({ embed });
+            client.channels.get(settings.logChannel).send({ embed }).catch(() => {});
         }
 
         if (settings.pinChannel && !settings.pins.includes(msg.id)) {
@@ -143,7 +143,7 @@ client.on("channelPinsUpdate", async ch => {
                 embed.setColor(0xFF470F);
                 if (msg.attachments.size !== 0) embed.setImage(msg.attachments.first().url);
 
-                client.channels.get(settings.logChannel).send({ embed });
+                client.channels.get(settings.logChannel).send({ embed }).catch(() => {});
             }
         });
     }
