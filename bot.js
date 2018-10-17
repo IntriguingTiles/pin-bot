@@ -106,7 +106,7 @@ client.on("channelPinsUpdate", async ch => {
             embed.setColor(0x23D160);
             if (msg.attachments.size !== 0) embed.setImage(msg.attachments.first().url);
 
-            client.channels.get(settings.logChannel).send({ embed,  }).catch(() => {});
+            client.channels.get(settings.logChannel).send({ embed }).catch(() => { });
         }
 
         if (settings.pinChannel && !settings.pins.includes(msg.id)) {
@@ -144,7 +144,7 @@ client.on("channelPinsUpdate", async ch => {
                 embed.setColor(0xFF470F);
                 if (msg.attachments.size !== 0) embed.setImage(msg.attachments.first().url);
 
-                client.channels.get(settings.logChannel).send({ embed }).catch(() => {});
+                client.channels.get(settings.logChannel).send({ embed }).catch(() => { });
             }
         });
     }
@@ -177,7 +177,7 @@ client.on("messageReactionAdd", async (react, user) => {
 
     const msg = react.message;
     const files = msg.attachments.size !== 0 ? [msg.attachments.first().url] : [];
-    webhook.send(msg.cleanContent, { username: msg.author.username, avatarURL: msg.author.displayAvatarURL, files, disableEveryone: true }); // impersonate the author
+    webhook.send(msg.cleanContent, { username: msg.author.username, avatarURL: msg.author.displayAvatarURL, files, embeds: msg.embeds, disableEveryone: true }); // impersonate the author
     settings.pins.push(msg.id);
     guildSettings.set(msg.guild.id, settings);
 });
