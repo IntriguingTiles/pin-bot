@@ -123,7 +123,7 @@ client.on("channelPinsUpdate", async ch => {
             }
 
             const files = msg.attachments.size !== 0 ? [msg.attachments.first().url] : [];
-            webhook.send(msg.cleanContent, { username: msg.author.username, avatarURL: msg.author.displayAvatarURL, files, disableEveryone: true }); // impersonate the author
+            webhook.send(msg.cleanContent, { username: msg.author.username, avatarURL: msg.author.displayAvatarURL, files, embeds: msg.embeds, disableEveryone: true }); // impersonate the author
             settings.pins.push(msg.id);
             guildSettings.set(ch.guild.id, settings);
         }
