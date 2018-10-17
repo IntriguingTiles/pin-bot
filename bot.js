@@ -66,6 +66,7 @@ client.on("guildDelete", async guild => {
 client.on("channelCreate", async ch => {
     // channel created, fetch the pins and add it to our map
     if (ch.type !== "text") return;
+    if (!ch.permissionsFor(client.user).has("VIEW_CHANNEL")) return;
     if (!guildSettings.get(ch.guild.id)) return;
     if (!guildSettings.get(ch.guild.id).logChannel && !guildSettings.get(ch.guild.id).pinChannel) return;
     const pins = await ch.fetchPinnedMessages();
