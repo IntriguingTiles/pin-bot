@@ -124,7 +124,7 @@ client.on("channelPinsUpdate", async ch => {
             }
 
             const files = msg.attachments.size !== 0 ? [msg.attachments.first().url] : [];
-            webhook.send(msg.cleanContent, { username: msg.author.username, avatarURL: msg.author.displayAvatarURL, files, embeds: msg.embeds, disableEveryone: true }); // impersonate the author
+            webhook.send(msg.cleanContent.replace(/@/g, "@" + String.fromCharCode(8203)), { username: msg.author.username, avatarURL: msg.author.displayAvatarURL, files, embeds: msg.embeds, disableEveryone: true }); // impersonate the author
             settings.pins.push(msg.id);
             guildSettings.set(ch.guild.id, settings);
         }
@@ -133,7 +133,6 @@ client.on("channelPinsUpdate", async ch => {
         const embed = new Discord.RichEmbed;
 
         previousPins.forEach(pin => {
-
             if (!currentPins.has(pin.id)) {
                 // found the removed pin
                 const msg = pin;
@@ -178,7 +177,7 @@ client.on("messageReactionAdd", async (react, user) => {
 
     const msg = react.message;
     const files = msg.attachments.size !== 0 ? [msg.attachments.first().url] : [];
-    webhook.send(msg.cleanContent, { username: msg.author.username, avatarURL: msg.author.displayAvatarURL, files, embeds: msg.embeds, disableEveryone: true }); // impersonate the author
+    webhook.send(msg.cleanContent.replace(/@/g, "@" + String.fromCharCode(8203)), { username: msg.author.username, avatarURL: msg.author.displayAvatarURL, files, embeds: msg.embeds, disableEveryone: true }); // impersonate the author
     settings.pins.push(msg.id);
     guildSettings.set(msg.guild.id, settings);
 });
@@ -257,7 +256,7 @@ ${prefix}help\`\`\``);
                 if (typeof evaled !== "string")
                     evaled = require("util").inspect(evaled);
 
-                msg.channel.send(clean(evaled), { code: "xl" }).catch(err => msg.channel.send("Result too big to send."));
+                msg.channel.send(clean(evaled), { code: "xl" }).catch(() => msg.channel.send("Result too big to send."));
             } catch (err) {
                 msg.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
             }
