@@ -86,6 +86,8 @@ client.on("channelPinsUpdate", async ch => {
 
     if (!settings.pinChannel && !settings.logChannel) return;
 
+    if (!ch.permissionsFor(client.user).has("VIEW_CHANNEL")) return console.log(`message pins updated in ${ch.name}`);
+
     const currentPins = await ch.fetchPinnedMessages();
     const previousPins = cachedPins.get(ch.id);
     let size;
