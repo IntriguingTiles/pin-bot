@@ -281,6 +281,14 @@ process.on("SIGINT", async () => {
     process.exit(0);
 });
 
+process.on("message", async msg => {
+    if (msg === "shutdown") {
+        guildSettings.close();
+        await client.destroy();
+        process.exit(0);
+    }
+});
+
 function clean(text) {
     if (typeof (text) === "string")
         return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203));
