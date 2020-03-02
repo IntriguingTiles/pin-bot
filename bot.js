@@ -38,6 +38,7 @@ client.on("ready", () => {
     // cache pins
     guildSettings.fetchEverything();
     guildSettings.filter(gs => gs.logChannel || gs.pinChannel).forEach((gs, id) => {
+        if (!client.guilds.cache.has(id)) return;
         client.guilds.cache.get(id).channels.cache.filter(ch => ch.type === "text" && ch.permissionsFor(client.user).has("VIEW_CHANNEL")).forEach(async ch => {
             const pins = await ch.messages.fetchPinned();
             cachedPins.set(ch.id, pins);
