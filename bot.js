@@ -2,7 +2,7 @@ require("dotenv").config();
 const Discord = require("discord.js");
 const Enamp = require("enmap");
 
-const client = new Discord.Client({ disableEveryone: true });
+const client = new Discord.Client({ disableEveryone: true, partials: ["MESSAGE", "CHANNEL", "REACTION"] });
 
 const prefix = "+";
 
@@ -26,7 +26,7 @@ client.login(process.env.DISCORD_TOKEN);
 
 process.on("unhandledRejection", err => {
     console.error(`Unhandled promise rejection!\n${err.stack}`);
-    client.users.get("221017760111656961").send(err.stack);
+    client.users.cache.get("221017760111656961").send(err.stack);
 });
 
 client.on("error", console.error);
@@ -38,13 +38,13 @@ client.on("ready", () => {
     // cache pins
     guildSettings.fetchEverything();
     guildSettings.filter(gs => gs.logChannel || gs.pinChannel).forEach((gs, id) => {
-        client.guilds.get(id).channels.filter(ch => ch.type === "text" && ch.permissionsFor(client.user).has("VIEW_CHANNEL")).forEach(async ch => {
-            const pins = await ch.fetchPinnedMessages();
+        client.guilds.cache.get(id).channels.cache.filter(ch => ch.type === "text" && ch.permissionsFor(client.user).has("VIEW_CHANNEL")).forEach(async ch => {
+            const pins = await ch.messages.fetchPinned();
             cachedPins.set(ch.id, pins);
             console.log(ch.name);
         });
     });
-    guildSettings.evict(client.guilds.keyArray());
+    guildSettings.evict(client.guilds.cache.keyArray());
 
     client.user.setActivity("+help");
 });
@@ -52,7 +52,7 @@ client.on("ready", () => {
 client.on("guildCreate", async guild => {
     guildSettings.set(guild.id, defaultSettings);
     guild.channels.filter(ch => ch.type === "text" && ch.permissionsFor(client.user).has("VIEW_CHANNEL")).forEach(async ch => {
-        const pins = await ch.fetchPinnedMessages();
+        const pins = await ch.messages.fetchPinned();
         cachedPins.set(ch.id, pins);
         console.log(ch.name);
     });
@@ -69,7 +69,7 @@ client.on("channelCreate", async ch => {
     if (!ch.permissionsFor(client.user).has("VIEW_CHANNEL")) return;
     if (!guildSettings.get(ch.guild.id)) return;
     if (!guildSettings.get(ch.guild.id).logChannel && !guildSettings.get(ch.guild.id).pinChannel) return;
-    const pins = await ch.fetchPinnedMessages();
+    const pins = await ch.messages.fetchPinned();
     cachedPins.set(ch.id, pins);
 });
 
@@ -88,7 +88,7 @@ client.on("channelPinsUpdate", async ch => {
 
     if (!ch.permissionsFor(client.user).has("VIEW_CHANNEL")) return console.log(`message pins updated in ${ch.name}`);
 
-    const currentPins = await ch.fetchPinnedMessages();
+    const currentPins = await ch.messages.fetchPinned();
     const previousPins = cachedPins.get(ch.id);
     let size;
 
@@ -100,53 +100,53 @@ client.on("channelPinsUpdate", async ch => {
         const msg = currentPins.first();
         if (settings.logChannel) {
 
-            const embed = new Discord.RichEmbed;
+            const embed = new Discord.MessageEmbed;
 
-            embed.setAuthor(msg.author.tag, msg.author.displayAvatarURL);
+            embed.setAuthor(msg.author.tag, msg.author.displayAvatarURL({ format: "png" }));
             embed.setDescription(`**Message sent by ${msg.author} pinned in ${ch}**\n${msg.content}`);
             embed.setFooter(`ID: ${msg.id}`);
             embed.setTimestamp();
             embed.setColor(0x23D160);
             if (msg.attachments.size !== 0) embed.setImage(msg.attachments.first().url);
 
-            client.channels.get(settings.logChannel).send({ embed }).catch(() => { });
+            client.channels.cache.get(settings.logChannel).send({ embed }).catch(() => { });
         }
 
         if (settings.pinChannel && !settings.pins.includes(msg.id)) {
-            const webhooks = await client.channels.get(settings.pinChannel).fetchWebhooks().catch(() => { /* I'm cheating */ }); // throws an error when we don't have access
+            const webhooks = await client.channels.cache.get(settings.pinChannel).fetchWebhooks().catch(() => { /* I'm cheating */ }); // throws an error when we don't have access
             if (!webhooks) return;
 
             let webhook;
 
             if (webhooks.size === 0) {
                 // try and make a new webhook
-                webhook = await client.channels.get(settings.pinChannel).createWebhook("PinBot", client.user.avatarURL, "A webhook is required for impersonation");
+                webhook = await client.channels.cache.get(settings.pinChannel).createWebhook("PinBot", client.user.avatarURL({ format: "png" }), "A webhook is required for impersonation");
             } else {
                 webhook = webhooks.array()[0]; // the webhook we use doesn't mater since we override the profile picture and name
             }
 
             const files = msg.attachments.size !== 0 ? [msg.attachments.first().url] : [];
-            webhook.send(msg.cleanContent.replace(/@/g, "@" + String.fromCharCode(8203)), { username: msg.author.username, avatarURL: msg.author.displayAvatarURL, files, embeds: msg.embeds, disableEveryone: true }); // impersonate the author
+            webhook.send(msg.cleanContent.replace(/@/g, "@" + String.fromCharCode(8203)), { username: msg.author.username, avatarURL: msg.author.displayAvatarURL({ format: "png" }), files, embeds: msg.embeds, disableEveryone: true }); // impersonate the author
             settings.pins.push(msg.id);
             guildSettings.set(ch.guild.id, settings);
         }
     } else if (currentPins.size < previousPins.size && settings.logChannel) {
         // message unpinned
-        const embed = new Discord.RichEmbed;
+        const embed = new Discord.MessageEmbed;
 
         previousPins.forEach(pin => {
             if (!currentPins.has(pin.id)) {
                 // found the removed pin
                 const msg = pin;
 
-                embed.setAuthor(msg.author.tag, msg.author.displayAvatarURL);
+                embed.setAuthor(msg.author.tag, msg.author.displayAvatarURL({ format: "png" }));
                 embed.setDescription(`**Message sent by ${msg.author} unpinned in ${ch}**\n${msg.content}`);
                 embed.setFooter(`ID: ${msg.id}`);
                 embed.setTimestamp();
                 embed.setColor(0xFF470F);
                 if (msg.attachments.size !== 0) embed.setImage(msg.attachments.first().url);
 
-                client.channels.get(settings.logChannel).send({ embed }).catch(() => { });
+                client.channels.cache.get(settings.logChannel).send({ embed }).catch(() => { });
             }
         });
     }
@@ -154,15 +154,24 @@ client.on("channelPinsUpdate", async ch => {
 });
 
 client.on("messageReactionAdd", async (react, user) => {
+    if (react.partial) {
+        await react.fetch();
+        await react.users.fetch();
+    }
+
+    if (user.partial) {
+        await user.fetch();
+    }
+
     if (react.message.channel.type !== "text" || user.id === react.message.author.id || react.emoji.name !== "📌") return;
 
     const settings = guildSettings.get(react.message.guild.id);
 
     if (!settings.pinChannel || settings.pinReactThreshold === 0) return;
-    if (react.users.filter(u => !u.bot).size !== settings.pinReactThreshold) return;
+    if (react.users.cache.filter(u => !u.bot).size !== settings.pinReactThreshold) return;
     if (settings.pins.includes(react.message.id)) return; // message already pinned
     // pin requirements met, let's check if we can impersonate the author of the message
-    const pinChannel = client.channels.get(settings.pinChannel);
+    const pinChannel = client.channels.cache.get(settings.pinChannel);
 
     if (!pinChannel) return;
     const webhooks = await pinChannel.fetchWebhooks().catch(() => { /* I'm cheating */ }); // throws an error when we don't have access
@@ -172,14 +181,14 @@ client.on("messageReactionAdd", async (react, user) => {
 
     if (webhooks.size === 0) {
         // try and make a new webhook
-        webhook = await pinChannel.createWebhook("PinBot", client.user.avatarURL, "A webhook is required for impersonation");
+        webhook = await pinChannel.createWebhook("PinBot", client.user.avatarURL({ format: "png" }), "A webhook is required for impersonation");
     } else {
         webhook = webhooks.array()[0]; // the webhook we use doesn't mater since we override the profile picture and name
     }
 
     const msg = react.message;
     const files = msg.attachments.size !== 0 ? [msg.attachments.first().url] : [];
-    webhook.send(msg.cleanContent.replace(/@/g, "@" + String.fromCharCode(8203)), { username: msg.author.username, avatarURL: msg.author.displayAvatarURL, files, embeds: msg.embeds, disableEveryone: true }); // impersonate the author
+    webhook.send(msg.cleanContent.replace(/@/g, "@" + String.fromCharCode(8203)), { username: msg.author.username, avatarURL: msg.author.displayAvatarURL({ format: "png" }), files, embeds: msg.embeds, disableEveryone: true }); // impersonate the author
     settings.pins.push(msg.id);
     guildSettings.set(msg.guild.id, settings);
 });
