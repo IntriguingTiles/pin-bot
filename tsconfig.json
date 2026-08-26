@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "es2023",
+        ],
+        "target": "es2022",
+        "rootDir": "src",
+        "outDir": "dist",
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "esModuleInterop": true,
+        "types": ["node"]
+    },
+    "include": [
+        "src"
+    ]
+}

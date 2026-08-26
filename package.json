@@ -1,0 +1,29 @@
+{
+  "name": "pin-bot",
+  "version": "1.0.0",
+  "description": "",
+  "license": "GPL-3.0-or-later",
+  "author": "",
+  "type": "module",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.4",
+    "bufferutil": "^4.1.0",
+    "discord.js": "^14.27.0",
+    "drizzle-orm": "^0.45.2",
+    "zlib-sync": "^0.1.10"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.2.0",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "^10.9.0",
+    "globals": "^17.11.0",
+    "tsx": "^4.23.12",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.67.0"
+  }
+}
