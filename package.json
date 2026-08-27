@@ -5,7 +5,7 @@
   "license": "GPL-3.0-or-later",
   "author": "",
   "type": "module",
-  "main": "bot.js",
+  "main": "dist/bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
