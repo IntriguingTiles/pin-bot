@@ -4,7 +4,9 @@ import { loadEnvFile } from "node:process";
 import { db } from "./db/index.js";
 import { guildSettings, pins } from "./db/schema.js";
 
-loadEnvFile();
+try {
+    loadEnvFile();
+} catch {/**/}
 
 const client = new Client({
     intents: [
