@@ -6,7 +6,7 @@ import { guildSettings, pins } from "./db/schema.js";
 
 try {
     loadEnvFile();
-} catch {/**/}
+} catch {/**/ }
 
 const client = new Client({
     intents: [
@@ -89,7 +89,7 @@ client.on(Events.MessageReactionAdd, async (react, user) => {
         await react.fetch();
         await react.users.fetch();
     }
-    
+
     if (user.partial) await user.fetch();
     if (react.message.partial) await react.message.fetch();
 
@@ -232,5 +232,10 @@ async function updateGuildSettings(guildId: string, data: Partial<Omit<typeof gu
 async function isAlreadyPinned(guildId: string, msgId: string) {
     return await db.query.pins.findFirst({ where: (table, { eq }) => eq(table.guildId, guildId) && eq(table.msgId, msgId) });
 }
+
+process.on("SIGINT", async () => {
+    await client.destroy();
+    process.exit(0);
+});
 
 client.login(process.env.TOKEN);
