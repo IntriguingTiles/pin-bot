@@ -21,5 +21,5 @@ COPY --from=builder /app/dist ./dist
 COPY drizzle ./drizzle
 RUN mkdir data
 
-USER user
+USER node
 CMD ["node", "dist/bot.js"]
