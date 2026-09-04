@@ -120,8 +120,21 @@ client.on(Events.InteractionCreate, async intr => {
 
         switch (subcommand) {
             case "show": {
-                const content = `Forwarding pinned messages to: ${guildSettings.pinChannel ? `<#${guildSettings.pinChannel}>` : "nowhere"}
-📌 reaction auto-pinning: ${guildSettings.pinReactThreshold > 0 ? `${guildSettings.pinReactThreshold} 📌 reactions required` : "disabled"}`;
+                let content = `Forwarding pinned messages to: ${guildSettings.pinChannel ? `<#${guildSettings.pinChannel}>` : "nowhere"}\n`;
+                if (guildSettings.pinChannel) {
+                    const ch = await intr.guild.channels.fetch(guildSettings.pinChannel);
+                    if (ch) {
+                        if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.ViewChannel))
+                            content += `WARNING: I don't have permission to view ${ch}.\n`;
+                        if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.SendMessages))
+                            content += `WARNING: I don't have permission to send messages in ${ch}.\n`;
+                        if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.EmbedLinks))
+                            content += `WARNING: I don't have permission to send embeds in ${ch}.\n`;
+                        if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.AttachFiles))
+                            content += `WARNING: I don't have permission to attach files in ${ch}.\n`;
+                    }
+                }
+                content += `📌 reaction auto-pinning: ${guildSettings.pinReactThreshold > 0 ? `${guildSettings.pinReactThreshold} 📌 reactions required` : "disabled"}`;
                 intr.reply({ content, flags: MessageFlags.Ephemeral });
                 break;
             }
