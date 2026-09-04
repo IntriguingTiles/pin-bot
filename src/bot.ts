@@ -25,7 +25,7 @@ const client = new Client({
         activities: [
             {
                 type: ActivityType.Watching,
-                name: "📌"
+                name: "📌 /config"
             }
         ]
     }
