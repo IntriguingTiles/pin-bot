@@ -26,5 +26,9 @@
     "tsx": "^4.23.12",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.67.0"
+  },
+  "allowScripts": {
+    "bufferutil@4.1.0": true,
+    "zlib-sync@0.1.10": true
   }
 }
