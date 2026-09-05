@@ -60,16 +60,13 @@ async function webhookPost(msg: Message<true>, chId: string) {
     if (!ch || !(ch instanceof TextChannel)) return;
 
     const webhooks = await ch.fetchWebhooks();
+    let webhook = webhooks.find(w => w.token != null);
 
-    let webhook: Webhook | undefined;
-
-    if (webhooks.size === 0) {
+    if (!webhook) {
         webhook = await ch.createWebhook({ name: "PinBot", avatar: msg.client.user.avatarURL({ extension: "png" }), reason: "A webhook is required for impersonation." });
-    } else {
-        webhook = webhooks.first();
     }
 
-    await webhook?.send({
+    await webhook.send({
         content: msg.content,
         username: msg.author.username,
         avatarURL: msg.author.displayAvatarURL(),
