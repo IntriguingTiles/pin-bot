@@ -152,12 +152,8 @@ client.on(Events.InteractionCreate, async intr => {
                     if (ch) {
                         if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.ViewChannel))
                             content += `WARNING: I don't have permission to view ${ch}.\n`;
-                        if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.SendMessages))
-                            content += `WARNING: I don't have permission to send messages in ${ch}.\n`;
-                        if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.EmbedLinks))
-                            content += `WARNING: I don't have permission to send embeds in ${ch}.\n`;
-                        if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.AttachFiles))
-                            content += `WARNING: I don't have permission to attach files in ${ch}.\n`;
+                        if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.ManageWebhooks))
+                            content += `WARNING: I don't have permission to manage webhooks in ${ch}.\n`;
                     }
                 }
                 content += `📌 reaction auto-pinning: ${guildSettings.pinReactThreshold > 0 ? `${guildSettings.pinReactThreshold} 📌 reactions required` : "disabled"}`;
@@ -173,12 +169,8 @@ client.on(Events.InteractionCreate, async intr => {
 
                     if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.ViewChannel))
                         return intr.reply({ content: `I don't have permission to view ${ch}.`, flags: MessageFlagsBitField.Flags.Ephemeral });
-                    if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.SendMessages))
-                        return intr.reply({ content: `I don't have permission to send messages in ${ch}.`, flags: MessageFlagsBitField.Flags.Ephemeral });
-                    if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.EmbedLinks))
-                        return intr.reply({ content: `I don't have permission to send embeds in ${ch}.`, flags: MessageFlagsBitField.Flags.Ephemeral });
-                    if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.AttachFiles))
-                        return intr.reply({ content: `I don't have permission to attach files in ${ch}.`, flags: MessageFlagsBitField.Flags.Ephemeral });
+                    if (!ch.permissionsFor(intr.guild.members.me).has(PermissionsBitField.Flags.ManageWebhooks))
+                        return intr.reply({ content: `I don't have permission to manage webhooks in ${ch}.`, flags: MessageFlagsBitField.Flags.Ephemeral });
 
                     updateGuildSettings(intr.guild.id, { pinChannel: ch.id });
                     let content = `Successfully set the pinned messages channel to ${ch}.`;
