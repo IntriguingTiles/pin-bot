@@ -1,4 +1,4 @@
-import { ActivityType, BaseGuildTextChannel, ChannelType, Client, Events, GatewayIntentBits, InteractionContextType, MessageFlags, MessageFlagsBitField, Partials, PermissionsBitField, SlashCommandBuilder } from "discord.js";
+import { ActivityType, BaseGuildTextChannel, ChannelType, Client, Events, GatewayIntentBits, InteractionContextType, Message, MessageFlags, MessageFlagsBitField, Partials, PermissionsBitField, SlashCommandBuilder, TextChannel, Webhook } from "discord.js";
 import { eq } from "drizzle-orm";
 import { loadEnvFile } from "node:process";
 import { db } from "./db/index.js";
@@ -28,7 +28,7 @@ const client = new Client({
                 name: "📌 /config"
             }
         ]
-    }
+    },
 });
 
 const guildSettingsCache = new Map<string, typeof guildSettings.$inferSelect>();
@@ -55,6 +55,32 @@ client.on(Events.GuildDelete, async guild => {
     await db.delete(guildSettings).where(eq(guildSettings.guildId, guild.id));
 });
 
+async function webhookPost(msg: Message<true>, chId: string) {
+    const ch = await msg.guild.channels.fetch(chId);
+    if (!ch || !(ch instanceof TextChannel)) return;
+
+    const webhooks = await ch.fetchWebhooks();
+
+    let webhook: Webhook | undefined;
+
+    if (webhooks.size === 0) {
+        webhook = await ch.createWebhook({ name: "PinBot", avatar: msg.client.user.avatarURL({ extension: "png" }), reason: "A webhook is required for impersonation." });
+    } else {
+        webhook = webhooks.first();
+    }
+
+    await webhook?.send({
+        content: msg.content,
+        username: msg.author.username,
+        avatarURL: msg.author.displayAvatarURL(),
+        files: [...msg.attachments.values()],
+        embeds: msg.embeds,
+        allowedMentions: {
+            parse: []
+        }
+    });
+}
+
 client.on(Events.ChannelPinsUpdate, async (ch, lastPinTimestamp) => {
     if (ch.isDMBased()) return;
     const settings = await getGuildSettings(ch.guild.id);
@@ -76,7 +102,7 @@ client.on(Events.ChannelPinsUpdate, async (ch, lastPinTimestamp) => {
         if (await isAlreadyPinned(ch.guild.id, msg.message.id)) return;
 
         try {
-            await msg.message.forward(settings.pinChannel);
+            await webhookPost(msg.message, settings.pinChannel);
             await db.insert(pins).values({ guildId: ch.guild.id, msgId: msg.message.id });
         } catch (err) {
             console.error("Failed to forward message:\n", err);
@@ -104,7 +130,7 @@ client.on(Events.MessageReactionAdd, async (react, user) => {
     if (await isAlreadyPinned(react.message.guild.id, react.message.id)) return;
 
     try {
-        await react.message.forward(settings.pinChannel);
+        await webhookPost(react.message as Message<true>, settings.pinChannel);
         await db.insert(pins).values({ guildId: react.message.guild.id, msgId: react.message.id });
     } catch (err) {
         console.error("Failed to forward message:\n", err);
